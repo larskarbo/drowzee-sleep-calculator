@@ -1,9 +1,17 @@
 .App {
   /* text-align: center; */
   display: flex;
+  flex-direction: row-reverse;
+
   > div {
     width:50%
   }
+  @media screen and (max-width: 800px) { 
+    display: block;
+    > div {
+      width:100%
+    }
+  } 
 
   .div {
     padding:20px
