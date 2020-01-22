@@ -170,9 +170,11 @@ class App extends React.Component {
           </div>
         </div>
         <div>
-          <canvas width={800} height={800} ref={c => (this.c = c)}>
+          <div style={{paddingTop: 25}}><canvas width={800} height={800} ref={c => (this.c = c)}>
             A chart
           </canvas>
+          </div>
+          
         </div>
       </div>
     );
