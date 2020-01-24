@@ -2,14 +2,24 @@ import React from "react";
 import logo from "./logo.svg";
 import "./App.scss";
 import Napchart from "napchart";
-import d from "./initialChartData.json";
 import moment from "moment";
 import ColorScheme from "color-scheme";
 import Color from "color";
 import "react-input-range/lib/css/index.css";
 import InputRange from "react-input-range";
-import { Container, Row, Col } from 'reactstrap';
+import { Container, Row, Col } from "reactstrap";
+import { TimePicker, Button as AntButton } from "antd";
 import Slider, { Range } from "rc-slider";
+import { Button, ButtonGroup } from "@material-ui/core";
+import "antd/dist/antd.css";
+import { tween } from 'shifty';
+
+function momentToMinutes(mm) {
+  var mmtMidnight = moment().startOf("day");
+
+  // Difference in minutes
+  return mm.diff(mmtMidnight, "minutes");
+}
 const colors = [
   "B84D00",
   "CB5310",
@@ -23,33 +33,60 @@ class App extends React.Component {
   state = {
     sod: 14,
     cyclelength: 90,
-    start:moment().hours(22).minutes(30)
+    start: moment()
+      .hours(7)
+      .minutes(30),
+    open: false,
+    mode: "wake",
+    calced: false,
+    times: []
   };
 
   componentDidMount() {
     var canvas = this.c;
     var ctx = canvas.getContext("2d");
 
-    var napchart = Napchart.init(ctx, d, {
-      responsive: true,
-      ampm: true
-    });
+    var napchart = Napchart.init(
+      ctx,
+      {
+        flags: [{ minutes: momentToMinutes(this.state.start) }],
+        elements: [
+        ],
+        colorTags: [],
+        shape: "circle",
+        lanes: 1,
+        lanesConfig: { 0: { locked: true } },
+        id: "nuosr",
+        metaInfo: { title: "", description: "" }
+      },
+      {
+        responsive: true,
+        ampm: false,
+        penMode: false
+      }
+    );
 
     window.napchart = napchart;
     this.chart = napchart;
-    this.figma();
-    this.draw();
+    // this.figma();
+    // this.drawWake();
 
     napchart.onUpdate = a => {
-      console.log("this.chart.data: ", this.chart.data);
-      const el = this.chart.data.elements.find(e => (e.id = "sod"));
-      console.log(el.start);
+      // const el = this.chart.data.elements.find(e => (e.id == 0));
+      if (!this.chart.data.elements.length) {
+        return;
+      }
+      const el = this.chart.data.elements[0];
+      var mmt = moment()
+        .startOf("day")
+        .add(el.end, "minutes");
+      this.wakeTime = momentToMinutes(mmt);
       this.setState({
-        start: moment()
-          .startOf("day")
-          .add(el.start, "minutes"),
-        sod: this.chart.helpers.duration(el.start, el.end)
+        start: mmt
+        // sod: this.chart.helpers.duration(el.start, el.end)
       });
+      console.log('yes')
+      this.rotateRight()
     };
   }
 
@@ -91,9 +128,9 @@ class App extends React.Component {
 
   now = () => {
     // Your moment
-    var mmt = moment();
-    this.state.start = mmt;
-    this.draw();
+    // var mmt = moment();
+    // this.state.start = mmt;
+    // // this.draw();
   };
 
   draw = () => {
@@ -128,6 +165,7 @@ class App extends React.Component {
           end: this.chart.helpers.limit(
             fallAsleepTime + this.state.cyclelength * (i + 1)
           ),
+          // id: ":)" +i,
           color: "#" + colors[i],
           text: this.chart.helpers.minutesToReadable(
             this.state.cyclelength * (i + 1)
@@ -136,18 +174,217 @@ class App extends React.Component {
       });
   };
 
+  drawWake = () => {
+    this.chart.setElements([]);
+    // Your moment at midnight
+
+    var wakeTime = momentToMinutes(this.state.start);
+
+    this.wakeTime = wakeTime;
+    Array(6)
+      .fill(0)
+      .forEach((a, i) => {
+        this.chart.createElement({
+          start: this.chart.helpers.limit(
+            wakeTime - this.state.cyclelength * (i + 1)
+          ),
+          end: this.chart.helpers.limit(wakeTime - this.state.cyclelength * i),
+          color: "#" + colors[i],
+          id: "id:" + i,
+          text: this.chart.helpers.minutesToReadable(
+            this.state.cyclelength * (i + 1)
+          )
+        });
+      });
+
+    this.setState({
+      calced: true
+    });
+  };
+
+  animyeah = () => {
+    for (let i = 0; i < 6; i++) {
+      tween({
+        from: { p: 0 },
+        to: { p: 1 },
+        delay: i * 100,
+        duration: 800,
+        easing: 'easeOutQuad',
+        step: state => {
+          this.chart.setAnimProgress("id:" + i, state.p)
+          this.chart.draw()
+        }
+      }).then(
+        () => console.log('All done!')
+      );
+    }
+
+    setTimeout(() => {
+      this.rotateRight()
+    }, 1000)
+    
+    
+  }
+  
+  rotateRight = () => {
+    
+    this.chart.animShapeLars({...this.chart.allShapes.circle, shift:this.chart.helpers.middlePoint(momentToMinutes(this.state.start)-6*90,momentToMinutes(this.state.start))})
+  }
+
+  handleOpenChange = open => {
+    this.setState({ open });
+  };
+
+  handleClose = () => this.setState({ open: false });
+
   render() {
+    let times = [];
+    let wake = ""
+    if (this.state.calced) {
+      times = [
+        this.wakeTime - this.state.cyclelength * 6,
+        this.wakeTime - this.state.cyclelength * 5,
+        this.wakeTime - this.state.cyclelength * 4
+      ]
+        .map(this.chart.helpers.limit)
+        .map(v => this.chart.helpers.minutesToClock(this.chart, v));
+      wake = this.chart.helpers.minutesToClock(this.chart, this.wakeTime)
+      console.log('wake: ', wake);
+    }
+    const activeButton = {
+      background: "#467F9F",
+      color: "white",
+      fontWeight: "bold"
+    };
     return (
       <div className="App">
-        <div >
-          <div style={{ paddingTop: 25 }}>
-            <canvas width={800} height={800} ref={c => (this.c = c)}>
-              A chart
-            </canvas>
+        <div>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+            }}>
+            <ButtonGroup
+              color="primary"
+              aria-label="outlined primary button group"
+            >
+              <Button
+                style={this.state.mode == "wake" ? activeButton : {}}
+                onClick={() => this.setState({ mode: "wake" })}
+              >
+                I want to wake up at
+              </Button>
+              <Button
+                onClick={() => this.setState({ mode: "sleep" })}
+                style={this.state.mode == "sleep" ? activeButton : {}}
+                disabled
+              >
+                <div><s>I want to go to sleep at</s><br/> (Coming soon) </div>
+              </Button>
+            </ButtonGroup>
+          </div>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              padding: 20
+            }}
+          >
+            <TimePicker
+              minuteStep={15}
+              format={"HH:mm"}
+              value={this.state.start}
+              onChange={v => {
+                console.log(v);
+                this.setState({ start: v }, () => {
+                  if(this.state.calced){
+                    this.drawWake()
+                    setTimeout(() => {
+
+                      this.rotateRight()
+                    }, 400)
+
+                  }
+                  this.chart.setFlag(momentToMinutes(this.state.start))
+                });
+              }}
+              open={this.state.open}
+              onOpenChange={this.handleOpenChange}
+              addon={() => (
+                <AntButton
+                  size="small"
+                  type="primary"
+                  onClick={this.handleClose}
+                >
+                  Ok
+                </AntButton>
+              )}
+            />
+          </div>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center"
+              // padding: 20
+            }}
+          >
+            <AntButton
+              // style={}
+              type="default"
+              onClick={() => {
+                this.drawWake()
+                this.animyeah()
+              }}
+            >
+              When should I fall asleep? 🛌
+            </AntButton>
+          </div>
+        </div>
+        <div>
+          <div style={{ paddingTop: 25, width: 400 }}>
+            <canvas ref={c => (this.c = c)}>A chart</canvas>
           </div>
         </div>
 
-        <div>
+        {times.length && (
+          <div className="res">
+            If you wake up at <span
+              style={{
+                backgroundColor: "#467F9F"
+              }}>{wake}</span>
+            <div>
+            You should aim to fall asleep at{" "}
+            <span
+              style={{
+                backgroundColor: "#" + colors[6]
+              }}
+            >
+              {times[0]}
+            </span>
+            ,{" "}
+            <span
+              style={{
+                backgroundColor: "#" + colors[5]
+              }}
+            >
+              {times[1]}
+            </span>{" "}
+            or{" "}
+            <span
+              style={{
+                backgroundColor: "#" + colors[4]
+              }}
+            >
+              {times[2]}
+            </span>
+            </div>
+          </div>
+        )}
+
+        {/* <div>
           <div className="div">
             <h2>When do you plan to go to bed?</h2>
             <button onClick={this.now}>Now!</button>
@@ -189,8 +426,7 @@ class App extends React.Component {
           <div className="div">
             <h3>Look at the chart to see when it is smart to wake up</h3>
           </div>
-        </div>
-        
+        </div> */}
       </div>
     );
   }
