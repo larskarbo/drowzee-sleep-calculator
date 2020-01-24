@@ -18,7 +18,9 @@
   .div {
     padding:20px
   }
-  padding: 20px
+  padding: 20px 20px;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.64);
+  margin: 10px
 }
 @keyframes slideInFromLeft {
   0% {
@@ -30,10 +32,11 @@
 }
 .res {
   opacity: 0;
-  animation: 0.4s ease-out 0.4s 1 slideInFromLeft;
+  animation: 0.4s ease-out 0.8s 1 slideInFromLeft;
   animation-fill-mode: forwards;
   font-size: 25px;
   // transition: 1s
+  padding-top:15px;
   span {
     padding: 4px 7px;
     color: white;
