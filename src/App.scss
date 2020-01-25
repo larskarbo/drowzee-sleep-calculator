@@ -44,14 +44,17 @@
     color: white;
     border-radius: 3px;
   }
-  position: absolute;
-  bottom: 0px;
+  position: relative;
   background: red;
-  height: 300px;
+  // height: 300px;
   box-sizing: border-box;
-  background: linear-gradient(180deg, transparent 5%, #FFFFFF 30%);
+  background: linear-gradient(180deg, transparent 0%, #FFFFFF 20%);
   padding: 20px;
-  padding-top:100px
+  padding-top:50px;
+
+  @media screen and (max-width: 600px) { 
+    font-size: 20px
+  } 
 }
 
 .App-logo {

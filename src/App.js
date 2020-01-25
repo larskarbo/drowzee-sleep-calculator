@@ -320,12 +320,14 @@ class App extends React.Component {
             When should I fall asleep? 🛌
           </AntButton>
         </div>
-        <div style={{ paddingTop: 25, position: "relative" }}>
+        <div style={{ paddingTop: 25 }}>
           <canvas ref={c => (this.c = c)}>A chart</canvas>
 
-          {times.length && (
+          {times.length ? (
             <div className="res" style={{
-              height: this.c.style.height/2
+              top: -this.chart.canvas.offsetHeight * 0.6,
+              marginBottom: -this.chart.canvas.offsetHeight * 0.6,
+              minHeight: this.chart.canvas.offsetHeight * 0.6
             }}>
               If you wake up at{" "}
               <span
@@ -362,7 +364,7 @@ class App extends React.Component {
                 </span>
               </div>
             </div>
-          )}
+          ):null}
         </div>
 
         {/* <div>
