@@ -20,9 +20,16 @@ function momentToMinutes(mm) {
   // Difference in minutes
   return mm.diff(mmtMidnight, "minutes");
 }
-const baseColor = Color('#467F9F')
-const colors = Array(7).fill(0).map((v,i) => baseColor.darken(0.05 * i).hex().substring(1))
-console.log('colors: ', colors);
+const baseColor = Color("#467F9F");
+const colors = Array(7)
+  .fill(0)
+  .map((v, i) =>
+    baseColor
+      .darken(0.05 * i)
+      .hex()
+      .substring(1)
+  );
+console.log("colors: ", colors);
 class App extends React.Component {
   state = {
     sod: 14,
@@ -80,8 +87,9 @@ class App extends React.Component {
       console.log("yes");
       this.rotateRight();
     };
-  }
 
+    napchart.updateDimensions();
+  }
 
   now = () => {
     // Your moment
@@ -215,13 +223,15 @@ class App extends React.Component {
       fontWeight: "bold"
     };
     return (
-      <div className="App" 
-      style={{
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        flexDirection: "column"
-      }}>
+      <div
+        className="App"
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          flexDirection: "column"
+        }}
+      >
         <div
           style={{
             display: "flex",
@@ -259,6 +269,13 @@ class App extends React.Component {
             padding: 20
           }}
         >
+          <span
+            style={{
+              paddingRight: 6
+            }}
+          >
+            ⏰ →{" "}
+          </span>{" "}
           <TimePicker
             minuteStep={15}
             format={"HH:mm"}
@@ -303,48 +320,50 @@ class App extends React.Component {
             When should I fall asleep? 🛌
           </AntButton>
         </div>
-        <div style={{ paddingTop: 25, width: 400 }}>
+        <div style={{ paddingTop: 25, position: "relative" }}>
           <canvas ref={c => (this.c = c)}>A chart</canvas>
-        </div>
 
-        {times.length && (
-          <div className="res">
-            If you wake up at{" "}
-            <span
-              style={{
-                backgroundColor: "#" +colors[0]
-              }}
-            >
-              {wake}
-            </span>
-            <div>
-              You should aim to fall asleep at{" "}
+          {times.length && (
+            <div className="res" style={{
+              height: this.c.style.height/2
+            }}>
+              If you wake up at{" "}
               <span
                 style={{
-                  backgroundColor: "#" + colors[2]
+                  backgroundColor: "#" + colors[0]
                 }}
               >
-                {times[0]}
-              </span>
-              ,{" "}
-              <span
-                style={{
-                  backgroundColor: "#" + colors[4]
-                }}
-              >
-                {times[1]}
-              </span>{" "}
-              or{" "}
-              <span
-                style={{
-                  backgroundColor: "#" + colors[6]
-                }}
-              >
-                {times[2]}
-              </span>
+                {wake}
+              </span>,
+              <div>
+                You should aim to fall asleep at{" "}
+                <span
+                  style={{
+                    backgroundColor: "#" + colors[2]
+                  }}
+                >
+                  {times[0]}
+                </span>
+                ,{" "}
+                <span
+                  style={{
+                    backgroundColor: "#" + colors[4]
+                  }}
+                >
+                  {times[1]}
+                </span>{" "}
+                or{" "}
+                <span
+                  style={{
+                    backgroundColor: "#" + colors[6]
+                  }}
+                >
+                  {times[2]}
+                </span>
+              </div>
             </div>
-          </div>
-        )}
+          )}
+        </div>
 
         {/* <div>
           <div className="div">
