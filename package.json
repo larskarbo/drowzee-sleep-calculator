@@ -15,7 +15,7 @@
     "color-scheme": "^1.0.1",
     "moment": "^2.24.0",
     "moment-timezone": "^0.5.27",
-    "napchart": "https://github.com/larskarbo/napchart#181d2410b",
+    "napchart": "https://github.com/larskarbo/napchart#ad81982",
     "node-sass": "^4.13.1",
     "rc-slider": "^9.1.0",
     "react": "^16.12.0",

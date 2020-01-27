@@ -38,7 +38,7 @@ class App extends React.Component {
       .hours(7)
       .minutes(30),
     open: false,
-    mode: "sleep",
+    mode: "wake",
     calced: false,
     times: []
   };
@@ -88,8 +88,12 @@ class App extends React.Component {
         // sod: this.chart.helpers.duration(el.start, el.end)
       });
       console.log("yes");
-      this.rotateRight();
     };
+
+    napchart.onUp = () => {
+
+      this.rotateRight();
+    }
 
     napchart.updateDimensions();
   }
@@ -142,7 +146,7 @@ class App extends React.Component {
       });
   };
 
-  drawWake = () => {
+  drawSleep = () => {
     this.chart.setElements([]);
     // Your moment at midnight
 
@@ -172,7 +176,7 @@ class App extends React.Component {
     });
   };
 
-  drawSleep = () => {
+  drawWake = () => {
     this.chart.setElements([]);
     // Your moment at midnight
 
@@ -245,7 +249,13 @@ class App extends React.Component {
   };
 
   handleClose = () => this.setState({ open: false });
-
+  reset = () => {
+    this.chart.setElements([])
+    this.chart.animShapeLars({
+      ...this.chart.allShapes.circle,
+      shift: 0
+    });
+  }
   render() {
     let times = [];
     let wake = "";
@@ -266,8 +276,8 @@ class App extends React.Component {
           this.wakeTime + this.state.cyclelength * 5,
           this.wakeTime + this.state.cyclelength * 6
         ]
-        .map(this.chart.helpers.limit)
-        .map(v => this.chart.helpers.minutesToClock(this.chart, v));
+          .map(this.chart.helpers.limit)
+          .map(v => this.chart.helpers.minutesToClock(this.chart, v));
         asleep = this.chart.helpers.minutesToClock(this.chart, this.wakeTime);
       }
     }
@@ -299,18 +309,12 @@ class App extends React.Component {
           >
             <Button
               style={this.state.mode == "wake" ? activeButton : {}}
-              onClick={() => this.setState({ mode: "wake" })}
-            >
-              I want to wake up at
-            </Button>
-            <Button
               onClick={() => {
-                this.setState({ mode: "sleep" });
                 if (!this.state.calced) {
                   this.setState(
                     {
                       start: moment()
-                        .hours(22)
+                        .hours(7)
                         .minutes(30)
                     },
                     () => {
@@ -320,7 +324,40 @@ class App extends React.Component {
                       );
                     }
                   );
+                } else {
+                  this.setState({
+                    start: moment()
+                      .hours(7)
+                      .minutes(30),
+                    calced: false,
+
+                  })
                 }
+                this.reset();
+                this.setState({ mode: "wake" });
+                
+              }}
+            >
+              I want to wake up at
+            </Button>
+            <Button
+              onClick={() => {
+                this.setState({ mode: "sleep" });
+                this.setState(
+                  {
+                    start: moment()
+                      .hours(22)
+                      .minutes(30),
+                      calced: false
+                  },
+                  () => {
+                    this.chart.setFlag(
+                      momentToMinutes(this.state.start),
+                      this.state.mode
+                    );
+                  }
+                )
+                this.reset();
               }}
               style={this.state.mode == "sleep" ? activeButton : {}}
             >
@@ -383,7 +420,11 @@ class App extends React.Component {
             // style={}
             type="default"
             onClick={() => {
-              this.drawWake();
+              if(this.state.mode == "wake"){
+                this.drawWake();
+              } else {
+                this.drawSleep()
+              }
               this.animyeah();
             }}
           >
@@ -395,97 +436,103 @@ class App extends React.Component {
         <div style={{ paddingTop: 25 }}>
           <canvas ref={c => (this.c = c)}>A chart</canvas>
 
-          {times.length ? (this.state.mode == "wake" ? <div>
-          <div
-              className="res"
-              style={{
-                top: -this.chart.canvas.offsetHeight * 0.6,
-                marginBottom: -this.chart.canvas.offsetHeight * 0.6,
-                minHeight: this.chart.canvas.offsetHeight * 0.6
-              }}
-            >
-              If you wake up at{" "}
-              <span
-                style={{
-                  backgroundColor: "#" + colors[0]
-                }}
-              >
-                {wake}
-              </span>
-              ,
+          {times.length ? (
+            this.state.mode == "wake" ? (
               <div>
-                You should aim to fall asleep at{" "}
-                <span
+                <div
+                  className="res"
                   style={{
-                    backgroundColor: "#" + colors[2]
+                    top: -this.chart.canvas.offsetHeight * 0.55,
+                    marginBottom: -this.chart.canvas.offsetHeight * 0.55,
+                    minHeight: this.chart.canvas.offsetHeight * 0.55
                   }}
                 >
-                  {times[0]}
-                </span>
-                ,{" "}
-                <span
-                  style={{
-                    backgroundColor: "#" + colors[4]
-                  }}
-                >
-                  {times[1]}
-                </span>{" "}
-                or{" "}
-                <span
-                  style={{
-                    backgroundColor: "#" + colors[6]
-                  }}
-                >
-                  {times[2]}
-                </span>
+                  If you wake up at{" "}
+                  <span
+                    style={{
+                      backgroundColor: "#" + colors[0]
+                    }}
+                  >
+                    {wake}
+                  </span>
+                  ,
+                  <div>
+                    You should aim to fall asleep at{" "}
+                    <span
+                      style={{
+                        backgroundColor: "#" + colors[2]
+                      }}
+                    >
+                      {times[0]}
+                    </span>
+                    ,{" "}
+                    <span
+                      style={{
+                        backgroundColor: "#" + colors[4]
+                      }}
+                    >
+                      {times[1]}
+                    </span>{" "}
+                    or{" "}
+                    <span
+                      style={{
+                        backgroundColor: "#" + colors[6]
+                      }}
+                    >
+                      {times[2]}
+                    </span>
+                  </div>
+                </div>
               </div>
-            </div>
-          </div> : <div>
-          <div
-              className="res"
-              style={{
-                top: -this.chart.canvas.offsetHeight * 0.6,
-                marginBottom: -this.chart.canvas.offsetHeight * 0.6,
-                minHeight: this.chart.canvas.offsetHeight * 0.6
-              }}
-            >
-              If you fall asleep at{" "}
-              <span
-                style={{
-                  backgroundColor: "#" + colors[0]
-                }}
-              >
-                {asleep}
-              </span>
-              ,
+            ) : (
               <div>
-                You should aim to wake up at{" "}
-                <span
+                <div
+                  className="res"
                   style={{
-                    backgroundColor: "#" + colors[2]
+                    top: -this.chart.canvas.offsetHeight * 0.55,
+                    marginBottom: -this.chart.canvas.offsetHeight * 0.55,
+                    minHeight: this.chart.canvas.offsetHeight * 0.55
                   }}
                 >
-                  {times[0]}
-                </span>
-                ,{" "}
-                <span
-                  style={{
-                    backgroundColor: "#" + colors[4]
-                  }}
-                >
-                  {times[1]}
-                </span>{" "}
-                or{" "}
-                <span
-                  style={{
-                    backgroundColor: "#" + colors[6]
-                  }}
-                >
-                  {times[2]}
-                </span>
+                  If you fall asleep at{" "}
+                  <span
+                    style={{
+                      backgroundColor: "#" + colors[0]
+                    }}
+                  >
+                    {asleep}
+                  </span>
+                  ,
+                  <div>
+                    You should aim to wake up at{" "}
+                    <span
+                      style={{
+                        backgroundColor: "#" + colors[2]
+                      }}
+                    >
+                      {times[0]}
+                    </span>
+                    ,{" "}
+                    <span
+                      style={{
+                        backgroundColor: "#" + colors[4]
+                      }}
+                    >
+                      {times[1]}
+                    </span>{" "}
+                    or{" "}
+                    <span
+                      style={{
+                        backgroundColor: "#" + colors[6]
+                      }}
+                    >
+                      {times[2]}
+                    </span>
+                  </div>
+                </div>
               </div>
-              </div>
-          </div>) : null}
+            )
+          ) : null}
         </div>
 
         {/* <div>
