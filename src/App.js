@@ -91,9 +91,8 @@ class App extends React.Component {
     };
 
     napchart.onUp = () => {
-
       this.rotateRight();
-    }
+    };
 
     napchart.updateDimensions();
   }
@@ -250,12 +249,12 @@ class App extends React.Component {
 
   handleClose = () => this.setState({ open: false });
   reset = () => {
-    this.chart.setElements([])
+    this.chart.setElements([]);
     this.chart.animShapeLars({
       ...this.chart.allShapes.circle,
       shift: 0
     });
-  }
+  };
   render() {
     let times = [];
     let wake = "";
@@ -310,31 +309,19 @@ class App extends React.Component {
             <Button
               style={this.state.mode == "wake" ? activeButton : {}}
               onClick={() => {
-                if (!this.state.calced) {
-                  this.setState(
-                    {
-                      start: moment()
-                        .hours(7)
-                        .minutes(30)
-                    },
-                    () => {
-                      this.chart.setFlag(
-                        momentToMinutes(this.state.start),
-                        this.state.mode
-                      );
-                    }
+                this.setState({
+                  start: moment()
+                    .hours(7)
+                    .minutes(30),
+                  calced: false,
+                  mode: "wake"
+                }, () => {
+                  this.chart.setFlag(
+                    momentToMinutes(this.state.start),
+                    this.state.mode
                   );
-                } else {
-                  this.setState({
-                    start: moment()
-                      .hours(7)
-                      .minutes(30),
-                    calced: false,
-
-                  })
-                }
+                });
                 this.reset();
-                this.setState({ mode: "wake" });
                 
               }}
             >
@@ -348,7 +335,7 @@ class App extends React.Component {
                     start: moment()
                       .hours(22)
                       .minutes(30),
-                      calced: false
+                    calced: false
                   },
                   () => {
                     this.chart.setFlag(
@@ -356,7 +343,7 @@ class App extends React.Component {
                       this.state.mode
                     );
                   }
-                )
+                );
                 this.reset();
               }}
               style={this.state.mode == "sleep" ? activeButton : {}}
@@ -420,10 +407,10 @@ class App extends React.Component {
             // style={}
             type="default"
             onClick={() => {
-              if(this.state.mode == "wake"){
+              if (this.state.mode == "wake") {
                 this.drawWake();
               } else {
-                this.drawSleep()
+                this.drawSleep();
               }
               this.animyeah();
             }}
